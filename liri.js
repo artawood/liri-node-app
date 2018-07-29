@@ -11,7 +11,25 @@ const fs = require("fs");
 let spotify = new Spotify(keys.spotify);
 let twitterClient = new Twitter(keys.twitter);
 let content;
-
+let requestFunc = () => {
+    request(queryURL, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            let jsonData = JSON.parse(body);
+            const displayMovie = [
+            "Title: " + jsonData.Title,
+            "Year: " + jsonData.Year,
+            "Rated: " + jsonData.Rated,
+            "IMDB Rating: " + jsonData.imdbRating,
+            "Country: " + jsonData.Country,
+            "Language: " + jsonData.Language,
+            "Plot: " + jsonData.Plot,
+            "Actors: " + jsonData.Actors,
+            "Rotten Tomatoes Rating: " + jsonData.Ratings[1].Value,
+            ].join("\n");
+            console.log(displayMovie);
+        }
+    });
+}
 
 inquire.prompt([{
         type: "list",
@@ -25,10 +43,9 @@ inquire.prompt([{
             }
             twitterClient.get('statuses/user_timeline', params, function (error, tweets) {
                 if (!error) {
-                    for (let i = 0; i < tweets.length; i++) {
-                        console.log(tweets[i].text);
-
-                    }
+                    tweets.forEach(tweet => {
+                        console.log(tweet.text);
+                    });
                 }
             })
         } else if (userInput.command === "Spotify this song") {
@@ -42,99 +59,110 @@ inquire.prompt([{
                 if (userInput.song === "") {
                     spotify.search({
                         type: 'track',
-                        query: "The Sign",
+                        query: "Umbrella",
                         limit: 5
                     }, function (err, data) {
-                        var songs = data.tracks.items
-                        var getArtistNames = function (artist) {
+                        if (err) {
+                            throw err;
+                        }
+                        let songs = data.tracks.items
+
+                        let getArtistNames = function (artist) {
                             return artist.name;
                         };
-                        for (var i = 0; i < songs.length; i++) {
-                            console.log(i);
-                            console.log("artist(s): " + songs[i].artists.map(getArtistNames));
-                            console.log("song name: " + songs[i].name);
-                            console.log("preview song: " + songs[i].preview_url);
-                            console.log("album: " + songs[i].album.name);
-                            console.log("-----------------------------------");
-                        }
-                    })
+                        songs.forEach(song => {
+                            const displaySong = [
+                                "-----------------------------------",
+                                "artist(s): " + song.artists.map(getArtistNames),
+                                "song name: " + song.name,
+                                "preview song: " + song.preview_url,
+                                "album: " + song.album.name,
+                                "-----------------------------------"
+                            ].join("\n\n");
+                            console.log(displaySong);
+                        });
+                    });
                 } else {
                     spotify.search({
                         type: 'track',
                         query: userInput.song,
                         limit: 5
                     }, function (err, data) {
-                        var songs = data.tracks.items
+                        if (err) {
+                            throw err;
+                        }
+                        let songs = data.tracks.items
 
-                        var getArtistNames = function (artist) {
+                        let getArtistNames = function (artist) {
                             return artist.name;
                         };
-
-                        for (var i = 0; i < songs.length; i++) {
-                            console.log(i);
-                            console.log("artist(s): " + songs[i].artists.map(getArtistNames));
-                            console.log("song name: " + songs[i].name);
-                            console.log("preview song: " + songs[i].preview_url);
-                            console.log("album: " + songs[i].album.name);
-                            console.log("-----------------------------------");
-                        }
+                        songs.forEach(song => {
+                            const displaySong = [
+                                "-----------------------------------",
+                                "artist(s): " + song.artists.map(getArtistNames),
+                                "song name: " + song.name,
+                                "preview song: " + song.preview_url,
+                                "album: " + song.album.name,
+                                "-----------------------------------"
+                            ].join("\n\n");
+                            console.log(displaySong);
+                        });
                     });
                 }
-            })
-                
+            });    
         } else if (userInput.command === "Watch movie") {
-            inquire
-                .prompt([{
-                    type: "input",
-                    message: "What movie do you want to watch?",
-                    name: "movie"
-                }]).then((userInput) => {
-                    if (userInput.movie === '') {
-                        var urlHit = "http://www.omdbapi.com/?t=" + "mr+nobody" + "&y=&plot=full&tomatoes=true&apikey=trilogy";
+            inquire.prompt([{
+                type: "input",
+                message: "What movie do you want to watch?",
+                name: "movie"
+            }]).then((userInput) => {
+                if (userInput.movie === '') {
+                    const queryURL = "http://www.omdbapi.com/?t=" + "mr+nobody" + "&y=&plot=full&tomatoes=true&apikey=trilogy";
 
-                        request(urlHit, function (error, response, body) {
-                            if (!error && response.statusCode === 200) {
-                                var jsonData = JSON.parse(body);
-
-                                console.log("Title: " + jsonData.Title);
-                                console.log("Year: " + jsonData.Year);
-                                console.log("Rated: " + jsonData.Rated);
-                                console.log("IMDB Rating: " + jsonData.imdbRating);
-                                console.log("Country: " + jsonData.Country);
-                                console.log("Language: " + jsonData.Language);
-                                console.log("Plot: " + jsonData.Plot);
-                                console.log("Actors: " + jsonData.Actors);
-                                console.log("Rotten Tomatoes Rating: " + jsonData.Ratings[1].Value);
-                            }
-                        });
-                    }
-
-
-
-                    var urlHit = "http://www.omdbapi.com/?t=" + userInput.movie + "&y=&plot=full&tomatoes=true&apikey=trilogy";
-
-                    request(urlHit, function (error, response, body) {
+                    request(queryURL, function (error, response, body) {
                         if (!error && response.statusCode === 200) {
-                            var jsonData = JSON.parse(body);
+                            let jsonData = JSON.parse(body);
+                            const displayMovie = [
+                            "Title: " + jsonData.Title,
+                            "Year: " + jsonData.Year,
+                            "Rated: " + jsonData.Rated,
+                            "IMDB Rating: " + jsonData.imdbRating,
+                            "Country: " + jsonData.Country,
+                            "Language: " + jsonData.Language,
+                            "Plot: " + jsonData.Plot,
+                            "Actors: " + jsonData.Actors,
+                            "Rotten Tomatoes Rating: " + jsonData.Ratings[1].Value,
+                            ].join("\n");
+                            console.log(displayMovie);
+                        }
+                    });
+                } else {
+                    const queryURL = "http://www.omdbapi.com/?t=" + userInput.movie + "&y=&plot=full&tomatoes=true&apikey=trilogy";
+                    request(queryURL, function (error, response, body) {
+                        if (!error && response.statusCode === 200) {
+                            let jsonData = JSON.parse(body);
                             //console.log(jsonData.response, jsonData);
                             if (jsonData.Response !== "False") {
-                                console.log("Title: " + jsonData.Title);
-                                console.log("Year: " + jsonData.Year);
-                                console.log("Rated: " + jsonData.Rated);
-                                console.log("IMDB Rating: " + jsonData.imdbRating);
-                                console.log("Country: " + jsonData.Country);
-                                console.log("Language: " + jsonData.Language);
-                                console.log("Plot: " + jsonData.Plot);
-                                console.log("Actors: " + jsonData.Actors);
-                                console.log("Rotten Tomatoes Rating: " + (jsonData.Ratings.length > 0) ? jsonData.Ratings[1].Value : '');
+                                let jsonData = JSON.parse(body);
+                                const displayMovie = [
+                                "Title: " + jsonData.Title,
+                                "Year: " + jsonData.Year,
+                                "Rated: " + jsonData.Rated,
+                                "IMDB Rating: " + jsonData.imdbRating,
+                                "Country: " + jsonData.Country,
+                                "Language: " + jsonData.Language,
+                                "Plot: " + jsonData.Plot,
+                                "Actors: " + jsonData.Actors,
+                                "Rotten Tomatoes Rating: " + jsonData.Ratings[1].Value,
+                                ].join("\n");
+                                console.log(displayMovie);
                             } else {
                                 console.log("No data!");
                             }
                         }
                     });
-
-                });
-
+                }
+            });
         } else if (userInput.command === "Ask a question") {
             fs.readFile("./random.txt", "utf-8", function read(err, data) {
                 if (err) {
@@ -144,4 +172,4 @@ inquire.prompt([{
                 console.log(content);
             });
         }
-    })
+    });
