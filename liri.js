@@ -1,7 +1,6 @@
 require("dotenv").config();
 
 const keys = require("./keys");
-
 const Twitter = require("twitter");
 const inquire = require("inquirer");
 const Spotify = require('node-spotify-api');
@@ -11,25 +10,6 @@ const fs = require("fs");
 let spotify = new Spotify(keys.spotify);
 let twitterClient = new Twitter(keys.twitter);
 let content;
-let requestFunc = () => {
-    request(queryURL, function (error, response, body) {
-        if (!error && response.statusCode === 200) {
-            let jsonData = JSON.parse(body);
-            const displayMovie = [
-            "Title: " + jsonData.Title,
-            "Year: " + jsonData.Year,
-            "Rated: " + jsonData.Rated,
-            "IMDB Rating: " + jsonData.imdbRating,
-            "Country: " + jsonData.Country,
-            "Language: " + jsonData.Language,
-            "Plot: " + jsonData.Plot,
-            "Actors: " + jsonData.Actors,
-            "Rotten Tomatoes Rating: " + jsonData.Ratings[1].Value,
-            ].join("\n");
-            console.log(displayMovie);
-        }
-    });
-}
 
 inquire.prompt([{
         type: "list",
